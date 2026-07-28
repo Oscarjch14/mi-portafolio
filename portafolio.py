@@ -5,6 +5,25 @@ st.set_page_config(page_title="Portafolio | Oscar Chuquihuamani", layout="wide")
 # --- ESTILOS PERSONALIZADOS (CSS) ---
 st.markdown("""
 <style>
+    /* 1. FORZAR FONDO AZUL MARINO PROFUNDO Y TEXTO CLARO SIEMPRE */
+    .stApp {
+        background-color: #0E1118 !important; /* Azul marino bien oscuro */
+    }
+    
+    /* Asegurar que el texto general sea blanco/claro para que contraste en móviles */
+    .stApp, .stApp p, .stApp li, .stApp span {
+        color: #e2e8f0 !important;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
+    }
+
+    /* 2. EVITAR DESCUADRE (SCROLL HORIZONTAL) EN CELULARES */
+    .block-container {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
     /* Igualar el color de fondo del panel lateral al de tu foto anime */
     [data-testid="stSidebar"] {
         background-color: #142c52 !important; 
@@ -12,10 +31,10 @@ st.markdown("""
     
     /* Ocultar la barra de desplazamiento (scrollbar) para un look limpio */
     [data-testid="stSidebar"] {
-        scrollbar-width: none; /* Para Firefox */
+        scrollbar-width: none;
     }
     [data-testid="stSidebar"]::-webkit-scrollbar {
-        display: none; /* Para Chrome, Safari y Edge */
+        display: none;
     }
     
     /* Estilos de los enlaces del menú */
@@ -30,13 +49,10 @@ st.markdown("""
         text-decoration: underline;
     }
 
-    /* --- NUEVOS ESTILOS: TÍTULO Y MÁQUINA DE ESCRIBIR --- */
-    
-    /* Título Fluorescente Animado */
+    /* --- ESTILOS: TÍTULO Y MÁQUINA DE ESCRIBIR --- */
     .titulo-fluorescente {
         font-size: 3.5rem;
         font-weight: 900;
-        /* Degradado con colores neón que resaltan en fondo oscuro */
         background: linear-gradient(90deg, #00f2fe, #4facfe, #ff0844, #ffb199, #00f2fe);
         background-size: 400%;
         -webkit-background-clip: text;
@@ -45,29 +61,27 @@ st.markdown("""
         margin-bottom: 5px;
     }
 
-    /* Animación del movimiento de los colores */
     @keyframes brillar {
         0% { background-position: 0% 50%; }
         100% { background-position: 400% 50%; }
     }
 
-    /* Efecto Máquina de Escribir para el subtítulo */
     .maquina-escribir-container {
         display: inline-block;
         margin-bottom: 25px;
+        max-width: 100%; 
     }
 
     .maquina-escribir {
-        color: #FFD700; /* Color Amarillo */
-        font-family: 'Courier New', Courier, monospace; /* Fuente de código/escritura */
+        color: #FFD700;
+        font-family: 'Courier New', Courier, monospace;
         font-size: 1.5rem;
         font-weight: 600;
         overflow: hidden;
-        border-right: 0.15em solid #FFD700; /* El cursor amarillo que parpadea */
+        border-right: 0.15em solid #FFD700;
         white-space: nowrap;
         margin: 0;
         letter-spacing: 0.05em;
-        /* Aumentamos los espacios a 48 y el tiempo a 4.5s para que entre todo suavemente */
         animation: 
             teclear 4.5s steps(48, end) infinite alternate,
             parpadear 0.8s step-end infinite;
@@ -75,7 +89,7 @@ st.markdown("""
 
     @keyframes teclear {
         from { width: 0; }
-        to { width: 48ch; } /* Ampliamos el margen para asegurar la palabra completa */
+        to { width: 48ch; }
     }
 
     @keyframes parpadear {
@@ -85,14 +99,33 @@ st.markdown("""
     
     /* --- COLOR VERDE PARA EL BOTÓN DE DESCARGA --- */
     [data-testid="stDownloadButton"] button {
-        background-color: #25D366 !important; /* Verde vibrante */
+        background-color: #25D366 !important;
         color: white !important;
         border: none !important;
         font-weight: 600 !important;
         transition: 0.3s;
     }
     [data-testid="stDownloadButton"] button:hover {
-        background-color: #128C7E !important; /* Verde más oscuro al pasar el mouse */
+        background-color: #128C7E !important;
+    }
+
+    /* --- 3. MAGIA RESPONSIVA (SOLO SE ACTIVA EN CELULARES) --- */
+    @media (max-width: 768px) {
+        .titulo-fluorescente {
+            font-size: 2.2rem !important; 
+        }
+        .maquina-escribir {
+            font-size: 13px !important; 
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .titulo-fluorescente {
+            font-size: 1.8rem !important;
+        }
+        .maquina-escribir {
+            font-size: 10px !important; /* Achicamos mucho la letra para que quepa perfecto sin descuadrar */
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -379,6 +412,43 @@ ventana.mainloop()''', language='python')
                     st.image("excel_bvl.jpg", use_container_width=True)
                 except FileNotFoundError:
                     st.info("📸 Sube una captura del Excel generado y llámala 'excel_bvl.jpg'")
+
+# --- (Aquí termina el primer proyecto) ---
+
+# Separador visual sutil entre proyectos
+st.markdown("<br><hr style='border-top: 1px dashed #4facfe; margin: 20px 0;'><br>", unsafe_allow_html=True)
+
+# --- NUEVO PROYECTO: VALORIZACIÓN DE ALICORP ---
+with st.container():
+    col_ali1, col_ali2 = st.columns([1, 2.5])
+    
+    with col_ali1:
+        # Espacio para una portada del informe (puedes tomarle captura a la primera hoja de tu PDF)
+        try:
+            st.image("portada_alicorp.jpg", use_container_width=True)
+        except FileNotFoundError:
+            st.info("📸 Sube una captura de la portada de tu informe y llámala 'portada_alicorp.jpeg'")
+            
+    with col_ali2:
+        st.subheader("Valorización Financiera de Alicorp S.A.A.")
+        st.write("Informe detallado sobre la valoración corporativa de Alicorp. Este documento abarca el análisis de la salud financiera, proyección de flujos de caja y determinación del valor intrínseco de la compañía, aplicando metodologías rigurosas de finanzas corporativas para la toma de decisiones en el mercado bursátil.")
+        
+        # Botón de descarga para el PDF de Valorización
+        # El nombre debe coincidir exactamente con el de tu carpeta
+        nombre_archivo_pdf = "Informe de Valorización de Alicorp - Elaborado por Oscar Chuquihuamani.pdf"
+        
+        try:
+            with open(nombre_archivo_pdf, "rb") as pdf_file:
+                pdf_bytes = pdf_file.read()
+            st.download_button(
+                label="📄 Descargar Informe de Valorización (Solo lectura)",
+                data=pdf_bytes,
+                file_name="Valorizacion_Alicorp_Oscar_Chuquihuamani.pdf",
+                mime="application/pdf",
+                key="btn_descarga_alicorp" # Clave única obligatoria para no crear conflictos con el botón de tu CV
+            )
+        except FileNotFoundError:
+            st.warning(f"⚠️ No se encontró el archivo '{nombre_archivo_pdf}'. Verifica que el nombre sea exacto.")
 
 st.divider()
 
