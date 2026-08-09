@@ -423,7 +423,7 @@ with st.container():
     col_ali1, col_ali2 = st.columns([1, 2.5])
     
     with col_ali1:
-        # Espacio para una portada del informe (puedes tomarle captura a la primera hoja de tu PDF)
+        # Espacio para una portada del informe 
         try:
             st.image("portada_alicorp.jpg", use_container_width=True)
         except FileNotFoundError:
@@ -449,6 +449,35 @@ with st.container():
             )
         except FileNotFoundError:
             st.warning(f"⚠️ No se encontró el archivo '{nombre_archivo_pdf}'. Verifica que el nombre sea exacto.")
+
+# --- (Aquí termina tu proyecto de Valorización de Alicorp) ---
+
+# Separador visual
+st.markdown("<br><hr style='border-top: 1px dashed #4facfe; margin: 20px 0;'><br>", unsafe_allow_html=True)
+
+# --- NUEVO PROYECTO: EXTRACTOR DE ESTADOS FINANCIEROS ---
+with st.container():
+    col_eeff1, col_eeff2 = st.columns([1.2, 2])
+    
+    with col_eeff1:
+        # Espacio para la imagen de tu Excel
+        try:
+            st.image("excel_estados_financieros.jpg", use_container_width=True, caption="Output automatizado de datos estructurados")
+        except FileNotFoundError:
+            st.info("📸 Sube la captura de cómo queda tu Excel y llámala 'excel_estados_financieros.jpg'")
+            
+    with col_eeff2:
+        st.subheader("Extractor Automatizado de Estados Financieros")
+        
+        st.write("Desarrollo de un script diseñado para la extracción masiva y estructuración de Balances Generales y Estados de Resultados a partir de múltiples reportes financieros en PDF. Esta herramienta reduce drásticamente las horas-hombre de procesamiento manual, siendo un activo clave para agilizar el análisis fundamental, la construcción de modelos de valoración corporativa, estudios de empresas comparables y la evaluación de la salud financiera.")
+        
+        st.write("**Escalamiento del proyecto (Visión a futuro):**")
+        st.write("Actualmente en proceso de integración con el motor de cotizaciones bursátiles para conformar un sistema integral de inteligencia financiera. Esto automatizará el cálculo de ratios financieros, KPIs sectoriales y la minería de datos cualitativos (composición accionaria, estructura corporativa y segmentación de ingresos).")
+        
+        # Etiqueta elegante para explicar por qué no hay código
+        st.info("🔒 **Confidencialidad:** El código fuente de este proyecto se mantiene en reserva debido a la sensibilidad de la información. Solo se mostrará en pantalla la estructura final de los datos procesados.")
+
+# --- (Aquí continúa el st.divider() y la Sección 6. CONTÁCTAME) ---
 
 st.divider()
 
