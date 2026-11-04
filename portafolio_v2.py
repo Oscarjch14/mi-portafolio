@@ -3,12 +3,20 @@ import os
 import random
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Portafolio | Oscar Chuquihuamani",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+umami_script = """
+<script defer src="https://cloud.umami.is/script.js"
+data-website-id="7bd0fdc3-37ce-45c1-b3bf-c3a4bb7e5543"></script>
+"""
+
+components.html(umami_script, height=0)
 
 # =====================================================================
 # 0. TEMAS (aquí cambias o agregas colores fácilmente)
