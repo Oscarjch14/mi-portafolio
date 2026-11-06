@@ -1,6 +1,7 @@
 import base64
 import os
 import random
+import unicodedata
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -78,6 +79,25 @@ def cv_data_uri(ruta="mi_cv.pdf"):
         with open(ruta, "rb") as f:
             return "data:application/pdf;base64," + base64.b64encode(f.read()).decode()
     return None
+
+
+def _norm(s):
+    """Normaliza un nombre: minúsculas, sin tildes, espacios ni símbolos."""
+    s = unicodedata.normalize("NFD", s.lower())
+    return "".join(c for c in s if c.isalnum())
+
+
+@st.cache_data(show_spinner=False)
+def doc_data_uri(nombre, limite=8_000_000):
+    """Busca un archivo por nombre (pdf/png/jpg) en la carpeta de la página.
+    Devuelve (enlace_de_descarga, nombre_real) o (None, None) si no existe o pesa mucho."""
+    mimes = {".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+    for f in os.listdir("."):
+        stem, ext = os.path.splitext(f)
+        if ext.lower() in mimes and _norm(stem) == _norm(nombre) and os.path.getsize(f) < limite:
+            with open(f, "rb") as fh:
+                return f"data:{mimes[ext.lower()]};base64," + base64.b64encode(fh.read()).decode(), f
+    return None, None
 
 
 def curva(pts):
@@ -699,19 +719,27 @@ if pagina == "inicio":
             st.warning("⚠️ No se encontró el archivo 'mi_cv'.")
 
     # ---------- Fila 2: datos rápidos ----------
+    OM_URI, OM_ARCH = doc_data_uri("Orden de Merito")  # PDF del Orden de Mérito
+
+    def stat(a, b, descargable=False):
+        cuerpo = f"<b>{a}</b><span>{b}</span>"
+        if descargable and OM_URI:
+            return (f'<a class="sm-card sm-stat sm-dl" href="{OM_URI}" download="{OM_ARCH}" '
+                    f'title="Descargar Orden de Mérito">{cuerpo}<small>📥 Descargar Orden de Mérito</small></a>')
+        return f'<div class="sm-card sm-stat">{cuerpo}</div>'
+
     st.markdown(
         '<div class="sm-grid sm-stats">'
-        + "".join(
-            f'<div class="sm-card sm-stat"><b>{a}</b><span>{b}</span></div>'
-            for a, b in (
-                ("24", "años"),
-                ("Tercio superior", "Economía · UNAC"),
-                ("2021 – 2026", "Formación universitaria"),
-                ("Big Four", "EY Perú · 2026"),
-            )
-        )
+        + stat("24", "años")
+        + stat("Tercio superior", "Economía · UNAC", True)
+        + stat("2021 – 2026", "Formación universitaria")
+        + stat("Big Four", "EY Perú · 2026")
         + "</div>",
         unsafe_allow_html=True,
+    )
+    TERCIO_CHIP = (
+        f'<a class="sm-chip" href="{OM_URI}" download="{OM_ARCH}" title="Descargar Orden de Mérito">Tercio Superior 📥</a>'
+        if OM_URI else '<span class="sm-chip">Tercio Superior</span>'
     )
 
     # ---------- Fila 3: formación académica ----------
@@ -721,7 +749,7 @@ if pagina == "inicio":
         + _img("logo_unac.png", "sm-edu-logo", "Universidad Nacional del Callao")
         + '<div><div class="sm-ct">Universidad Nacional del Callao</div>'
         '<div class="sm-meta">Economía · Agosto 2021 – Actualidad</div>'
-        '<div class="sm-chips"><span class="sm-chip">Tercio Superior</span><span class="sm-chip">Egreso: 2026-II</span></div>'
+        '<div class="sm-chips">' + TERCIO_CHIP + '<span class="sm-chip">Egreso: 2026-II</span></div>'
         "<p>Estudiar Economía me enseñó a mirar los problemas con rigor: entender cómo se toman las decisiones, "
         "cómo se mueven los mercados y cómo los datos sostienen una conclusión.</p>"
         "<p>Durante mi formación he desarrollado una sólida base en el análisis del mercado bursátil y la investigación econométrica aplicada. "
@@ -786,6 +814,15 @@ if pagina == "inicio":
   box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 35%, transparent); }
 .ex-info { flex: 1 1 320px; }
 .ex-info .sm-chips { margin: 8px 0 0; }
+
+/* Introducción al feedback del gerente (va dentro de la tarjeta del cargo, ocupa todo el ancho) */
+.ex-fb { flex: 1 1 100%; display: flex; gap: 16px; align-items: flex-start; padding: 16px 22px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--panel)), transparent); }
+.ex-fb-q { font-family: Georgia, serif; font-size: 3.4rem; line-height: .75; color: var(--accent); flex: none; }
+.ex-fb p { margin: 0; line-height: 1.65; }
+.ex-fb .ex-fb-t { color: #fff; font-weight: 800; margin-bottom: 4px; }
+.ex-fb .nom { color: var(--accent2); font-weight: 700; }
 .ex-date { padding: 10px 18px; border-radius: 14px; font-weight: 700; white-space: nowrap;
   border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .ex-date small { display: block; font-weight: 500; opacity: .75; }
@@ -808,6 +845,23 @@ if pagina == "inicio":
 @keyframes llenar { from { width: 0; } to { width: var(--w); } }
 .sk-sub { color: var(--accent2); font-weight: 700; letter-spacing: .08em; font-size: .8rem; margin: 18px 0 2px; }
 
+/* Separación entre la tarjeta del cargo y las tarjetas de abajo */
+[data-testid="stElementContainer"]:has(.ex-head), .element-container:has(.ex-head) { margin-bottom: 1.8rem !important; }
+
+/* Botones de documentos */
+.ex-docs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.ex-doc { padding: 8px 16px; border-radius: 999px; font-size: .85rem; font-weight: 700; white-space: nowrap;
+  text-decoration: none !important; color: var(--accent) !important; transition: .25s;
+  border: 1.5px solid var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.ex-doc:hover { background: var(--accent); color: #04110a !important; transform: translateY(-1px);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 50%, transparent); }
+
+/* Tarjeta y etiqueta "Tercio superior" clicables */
+.sm-dl { display: block; text-decoration: none !important; color: inherit !important; cursor: pointer; }
+.sm-dl small { display: block; margin-top: 6px; font-size: .75rem; color: var(--accent2); }
+a.sm-chip { text-decoration: none !important; cursor: pointer; transition: .2s; }
+a.sm-chip:hover { background: var(--accent); color: #04110a !important; }
+
 @media (max-width: 1000px) { .ex-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px)  { .ex-grid { grid-template-columns: 1fr; } .ex-head { padding: 18px; } }
 </style>
@@ -816,15 +870,37 @@ if pagina == "inicio":
     )
 
     # ---------- Cargo ----------
+    CONST_URI, CONST_ARCH = doc_data_uri("ConstanciaTrabajoEY")
+    FEED_URI, FEED_ARCH = doc_data_uri("feedback_EY")
+
+    def btn_doc(uri, arch, texto):
+        return f'<a class="ex-doc" href="{uri}" download="{arch}">{texto}</a>' if uri else ""
+
+    docs_html = btn_doc(CONST_URI, CONST_ARCH, "📄 Constancia de trabajo") + btn_doc(FEED_URI, FEED_ARCH, "💬 Feedback de EY")
+
+    FB_HTML = (
+        '<div class="ex-fb"><div class="ex-fb-q">“</div><div>'
+        '<p class="ex-fb-t">Feedback de mi gerente</p>'
+        '<p><span class="nom">Christian Johnson</span>, Gerente del Área de Precios de Transferencia, durante mi estadía en EY, '
+        "compartió conmigo una evaluación de mi desempeño en mi área de trabajo. "
+        "Puedes descargar el documento completo dando clic en el botón de arriba «Feedback de EY».</p>"
+        "</div></div>"
+        if FEED_URI
+        else ""
+    )
+
     st.markdown(
         '<div class="sm-card ex-head">'
         + _img("logo_ey.png", "ex-logo", "EY")
         + '<div class="ex-info"><div class="sm-ct">EY Perú (Ernst &amp; Young)</div>'
         '<div class="sm-meta">Asistente Junior del Área de Precios de Transferencia</div>'
         '<div class="sm-chips"><span class="sm-chip">Firma global · Big Four</span>'
-        '<span class="sm-chip">Consultoría fiscal</span></div></div>'
+        '<span class="sm-chip">Consultoría fiscal</span></div>'
+        + (f'<div class="ex-docs">{docs_html}</div>' if docs_html else "")
+        + "</div>"
         '<div class="ex-date">📅 05/2026 – 31/10/2026<small>Experiencia finalizada</small></div>'
-        "</div>",
+        + FB_HTML
+        + "</div>",
         unsafe_allow_html=True,
     )
 
